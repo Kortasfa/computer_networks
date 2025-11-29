@@ -53,6 +53,4 @@ make test
 ```
 
 ### Демонстрация
-1.  Запустите сервер: `./webserver`
-2.  Откройте браузер и перейдите по адресу `http://localhost:8080/index.html` (должен отобразиться "Hello, World!").
-3.  Перейдите по адресу `http://localhost:8080/missing.html` (должно отобразиться "File Not Found").
+![Demonstration](demonstartion.png)
