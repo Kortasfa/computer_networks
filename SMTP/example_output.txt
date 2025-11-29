@@ -1,0 +1,110 @@
+$ ./smtp_client localhost test@example.com recipient@test.com "Hello World" "This is a test message from SMTP client"
+
+=== Запуск SMTP-клиента ===
+Сервер: localhost
+От: test@example.com
+Кому: recipient@test.com
+Тема: Hello World
+================================
+
+Сокет создан успешно
+Разрешён хост localhost -> 127.0.0.1
+Подключение к localhost:25...
+Подключение установлено
+S: 220 mac Python SMTP proxy version 0.3
+C: HELO example.com
+S: 250 mac
+C: MAIL FROM:<test@example.com>
+S: 250 OK
+C: RCPT TO:<recipient@test.com>
+S: 250 OK
+C: DATA
+S: 354 End data with <CR><LF>.<CR><LF>
+C: [Email content]
+S: 250 OK
+Письмо успешно отправлено!
+C: QUIT
+S: 221 Bye
+Соединение закрыто
+```
+
+### Терминал 1 - Полученное письмо на сервере:
+```
+---------- MESSAGE FOLLOWS ----------
+b'From: test@example.com'
+b'To: recipient@test.com'
+b'Subject: Hello World'
+b'X-Peer: 127.0.0.1'
+b''
+b'This is a test message from SMTP client'
+------------ END MESSAGE ------------
+```
+
+## Пример 2: SMTP-диалог в деталях
+
+```
+$ ./smtp_client localhost admin@mycompany.com user@client.com "Meeting Tomorrow" "Hi, let's meet tomorrow at 10 AM"
+
+=== Запуск SMTP-клиента ===
+Сервер: localhost
+От: admin@mycompany.com
+Кому: user@client.com
+Тема: Meeting Tomorrow
+================================
+
+Сокет создан успешно
+Разрешён хост localhost -> 127.0.0.1
+Подключение к localhost:25...
+Подключение установлено
+S: 220 localhost ESMTP Postfix
+C: HELO example.com
+S: 250 localhost
+C: MAIL FROM:<admin@mycompany.com>
+S: 250 2.1.0 Ok
+C: RCPT TO:<user@client.com>
+S: 250 2.1.5 Ok
+C: DATA
+S: 354 End data with <CR><LF>.<CR><LF>
+C: [Email content]
+S: 250 2.0.0 Ok: queued as A1B2C3D4E5
+Письмо успешно отправлено!
+C: QUIT
+S: 221 2.0.0 Bye
+Соединение закрыто
+```
+
+## Пример 3: Ошибка при использовании неверного сервера
+
+```
+$ ./smtp_client nonexistent.server.com test@test.com user@user.com "Test" "Test"
+
+=== Запуск SMTP-клиента ===
+Сервер: nonexistent.server.com
+От: test@test.com
+Кому: user@user.com
+Тема: Test
+================================
+
+Сокет создан успешно
+Не удалось разрешить имя хоста: nonexistent.server.com
+Не удалось подключиться к SMTP-серверу
+```
+
+## Пример 4: Ошибка подключения (сервер не запущен)
+
+```
+$ ./smtp_client localhost test@test.com user@user.com "Test" "Test"
+
+=== Запуск SMTP-клиента ===
+Сервер: localhost
+От: test@test.com
+Кому: user@user.com
+Тема: Test
+================================
+
+Сокет создан успешно
+Разрешён хост localhost -> 127.0.0.1
+Подключение к localhost:25...
+Ошибка подключения к серверу
+Не удалось подключиться к SMTP-серверу
+```
