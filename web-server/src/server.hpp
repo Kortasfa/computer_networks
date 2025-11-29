@@ -27,7 +27,6 @@ public:
     void start();
     void stop();
 
-    // Public for testing purposes, normally would be private
     static HttpRequest parseRequest(const std::string& rawRequest);
     HttpResponse handleRequest(const HttpRequest& request);
 

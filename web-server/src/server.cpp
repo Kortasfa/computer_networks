@@ -116,22 +116,15 @@ HttpResponse WebServer::handleRequest(const HttpRequest& request) {
     HttpResponse response;
 
     if (request.method != "GET") {
-        response.statusCode = 405; // Method Not Allowed (simplified handling as per task reqs usually only ask for GET)
-        // But task says "Support GET", implies others might be ignored or error. 
-        // Task 3.3.2 says "Support method GET".
-        // Let's stick to the task requirements for 404 and 200.
-        // If not GET, we can treat as error or just try to serve. 
-        // Let's assume we only handle GET.
+        response.statusCode = 405;
     }
 
     std::string filePath = publicDir + request.path;
     
-    // Default to index.html if path is /
     if (request.path == "/") {
         filePath += "index.html";
     }
 
-    // Simple security check to prevent directory traversal
     if (filePath.find("..") != std::string::npos) {
          response.statusCode = 404;
          response.contentType = "text/plain";
