@@ -1,0 +1,17 @@
+[client] Socket created
+[client] Connected to 127.0.0.1:5555
+[client] Sent name and number
+[client] Client name: Client of Test
+[client] Server name: Server of Computer Networks
+[client] Client number: 7
+[client] Server number: 50
+[client] Sum: 57
+---
+[server] Socket created
+[server] Bound to port 5555
+[server] Listening...
+[server] Client name: Client of Test
+[server] Server name: Server of Computer Networks
+[server] Client number: 7
+[server] Server number: 50
+[server] Sum: 57

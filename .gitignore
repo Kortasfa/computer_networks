@@ -1,0 +1,13 @@
+SMTP/smtp_client
+SMTP/tests/unit_tests
+socket-programming/client
+socket-programming/server
+web-server/webserver
+web-server/run_tests
+
+__pycache__/
+*.pyc
+
+.DS_Store
+
+*.md

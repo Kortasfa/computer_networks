@@ -1,0 +1,20 @@
+# Исполняемые файлы
+smtp_client
+
+# Объектные файлы
+*.o
+*.obj
+
+# Отладочные файлы
+*.dSYM/
+
+# Временные файлы
+*.swp
+*.swo
+*~
+.DS_Store
+
+# IDE файлы
+.vscode/
+.idea/
+*.code-workspace
