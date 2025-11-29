@@ -1,7 +1,5 @@
 #!/bin/bash
-# Главный скрипт для запуска всех тестов SMTP-клиента
 
-# Цвета
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -19,18 +17,15 @@ echo -e "${BOLD}${MAGENTA}     SMTP Client - Test Suite${NC}"
 echo -e "${BOLD}${MAGENTA}========================================${NC}"
 echo ""
 
-# Проверка наличия директории с тестами
 if [ ! -d "$TESTS_DIR" ]; then
     echo -e "${RED}✗ Tests directory not found: $TESTS_DIR${NC}"
     exit 1
 fi
 
-# Счётчики
 TOTAL_SUITES=0
 PASSED_SUITES=0
 FAILED_SUITES=0
 
-# Функция для запуска набора тестов
 run_test_suite() {
     local suite_name=$1
     local suite_command=$2
@@ -55,7 +50,6 @@ run_test_suite() {
     echo ""
 }
 
-# 1. Проверка компиляции основного проекта
 echo -e "${YELLOW}Step 1: Building main project...${NC}"
 if make clean && make; then
     echo -e "${GREEN}✓ Build successful${NC}"
@@ -67,7 +61,6 @@ echo ""
 echo -e "${BLUE}----------------------------------------${NC}"
 echo ""
 
-# 2. Компиляция и запуск unit-тестов
 echo -e "${YELLOW}Step 2: Compiling and running unit tests...${NC}"
 if [ -f "$TESTS_DIR/unit_tests.cpp" ]; then
     cd "$TESTS_DIR"
@@ -87,21 +80,19 @@ else
     echo ""
 fi
 
-# 3. Запуск интеграционных тестов
 echo -e "${YELLOW}Step 3: Running integration tests...${NC}"
 echo ""
 
 if [ -f "$TESTS_DIR/integration_tests.sh" ]; then
     chmod +x "$TESTS_DIR/integration_tests.sh"
     
-    # Проверка доступности SMTP-сервера
-    if nc -z -w 2 localhost 25 2>/dev/null; then
+    if nc -z -w 2 localhost 2525 2>/dev/null; then
         echo -e "${GREEN}✓ SMTP server detected${NC}"
         echo ""
         run_test_suite "Integration Tests" "$TESTS_DIR/integration_tests.sh"
     else
         echo -e "${YELLOW}! SMTP server not running${NC}"
-        echo -e "${YELLOW}  Start server with: python3 -m smtpd -n -c DebuggingServer localhost:25${NC}"
+        echo -e "${YELLOW}  Start server with: python3 -m smtpd -n -c DebuggingServer 127.0.0.1:2525${NC}"
         echo -e "${YELLOW}  Skipping integration tests${NC}"
         echo ""
     fi
@@ -110,7 +101,6 @@ else
     echo ""
 fi
 
-# 4. Проверка синтаксиса и предупреждений
 echo -e "${YELLOW}Step 4: Code quality checks...${NC}"
 echo ""
 
@@ -130,7 +120,6 @@ echo ""
 echo -e "${BLUE}----------------------------------------${NC}"
 echo ""
 
-# Итоговая статистика
 echo -e "${BOLD}${MAGENTA}========================================${NC}"
 echo -e "${BOLD}${MAGENTA}         Final Summary${NC}"
 echo -e "${BOLD}${MAGENTA}========================================${NC}"
@@ -148,7 +137,6 @@ if [ $TOTAL_SUITES -gt 0 ]; then
     echo ""
 fi
 
-# Проверка исполняемого файла
 if [ -f "./smtp_client" ]; then
     echo -e "${GREEN}✓ Executable ready: smtp_client${NC}"
     echo "  Size: $(ls -lh smtp_client | awk '{print $5}')"
@@ -160,7 +148,6 @@ echo ""
 echo -e "${BOLD}${MAGENTA}========================================${NC}"
 echo ""
 
-# Финальный результат
 if [ $FAILED_SUITES -eq 0 ]; then
     echo -e "${GREEN}${BOLD}🎉 All tests passed! Project is ready.${NC}"
     echo ""

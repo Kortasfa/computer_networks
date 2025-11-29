@@ -1,27 +1,23 @@
 #!/bin/bash
-# Интеграционные тесты для SMTP-клиента
-# Требуют запущенного SMTP-сервера
 
-# Цвета для вывода
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 TESTS_PASSED=0
 TESTS_FAILED=0
-SMTP_SERVER="localhost"
-SMTP_PORT=25
+SMTP_SERVER="127.0.0.1"
+SMTP_PORT=2525
 
 echo -e "${BOLD}${BLUE}=====================================${NC}"
 echo -e "${BOLD}${BLUE}  SMTP Client - Integration Tests${NC}"
 echo -e "${BOLD}${BLUE}=====================================${NC}"
 echo ""
 
-# Проверка наличия исполняемого файла
 if [ ! -f "./smtp_client" ]; then
     echo -e "${RED}✗ Error: smtp_client executable not found${NC}"
     echo "Run: make"
@@ -31,7 +27,6 @@ fi
 echo -e "${GREEN}✓ Found smtp_client executable${NC}"
 echo ""
 
-# Функция для проверки доступности SMTP-сервера
 check_smtp_server() {
     echo -e "${CYAN}Checking SMTP server on ${SMTP_SERVER}:${SMTP_PORT}...${NC}"
     
@@ -42,13 +37,12 @@ check_smtp_server() {
         echo -e "${RED}✗ SMTP server is not accessible${NC}"
         echo ""
         echo -e "${YELLOW}Please start SMTP server first:${NC}"
-        echo "  python3 -m smtpd -n -c DebuggingServer localhost:25"
+        echo "  python3 -m smtpd -n -c DebuggingServer 127.0.0.1:2525"
         echo ""
         return 1
     fi
 }
 
-# Функция для запуска теста
 run_test() {
     local test_name=$1
     local from=$2
@@ -58,11 +52,9 @@ run_test() {
     
     echo -e "${CYAN}Running: ${test_name}${NC}"
     
-    # Запуск клиента
     output=$(./smtp_client ${SMTP_SERVER} "${from}" "${to}" "${subject}" "${body}" 2>&1)
     exit_code=$?
     
-    # Проверка успешности
     if [ $exit_code -eq 0 ] && echo "$output" | grep -q "Письмо успешно отправлено"; then
         echo -e "${GREEN}  ✓ PASSED${NC}"
         ((TESTS_PASSED++))
@@ -77,7 +69,6 @@ run_test() {
     fi
 }
 
-# Функция для теста с ожиданием ошибки
 run_error_test() {
     local test_name=$1
     local server=$2
@@ -88,11 +79,9 @@ run_error_test() {
     
     echo -e "${CYAN}Running: ${test_name}${NC}"
     
-    # Запуск клиента
     output=$(./smtp_client "${server}" "${from}" "${to}" "${subject}" "${body}" 2>&1)
     exit_code=$?
     
-    # Ожидаем ошибку
     if [ $exit_code -ne 0 ]; then
         echo -e "${GREEN}  ✓ PASSED (error expected)${NC}"
         ((TESTS_PASSED++))
@@ -104,7 +93,6 @@ run_error_test() {
     fi
 }
 
-# Проверка SMTP-сервера
 if ! check_smtp_server; then
     echo -e "${YELLOW}Skipping integration tests (server not available)${NC}"
     exit 0
@@ -113,7 +101,6 @@ fi
 echo ""
 echo -e "${YELLOW}Basic Functionality Tests:${NC}"
 
-# Тест 1: Простое текстовое письмо
 run_test "Simple text email" \
     "test@example.com" \
     "recipient@example.com" \
@@ -122,7 +109,6 @@ run_test "Simple text email" \
 
 echo ""
 
-# Тест 2: Письмо с длинной темой
 run_test "Email with long subject" \
     "sender@test.com" \
     "receiver@test.com" \
@@ -131,7 +117,6 @@ run_test "Email with long subject" \
 
 echo ""
 
-# Тест 3: Письмо с многострочным телом
 run_test "Email with multiline body" \
     "admin@company.com" \
     "user@client.com" \
@@ -142,7 +127,6 @@ Line 3"
 
 echo ""
 
-# Тест 4: Письмо со специальными символами
 run_test "Email with special characters" \
     "user@test.com" \
     "recipient@test.com" \
@@ -151,7 +135,6 @@ run_test "Email with special characters" \
 
 echo ""
 
-# Тест 5: Пустая тема
 run_test "Email with empty subject" \
     "sender@example.com" \
     "receiver@example.com" \
@@ -160,7 +143,6 @@ run_test "Email with empty subject" \
 
 echo ""
 
-# Тест 6: Короткое сообщение
 run_test "Very short email" \
     "a@b.com" \
     "c@d.com" \
@@ -171,7 +153,6 @@ echo ""
 
 echo -e "${YELLOW}Error Handling Tests:${NC}"
 
-# Тест 7: Несуществующий сервер
 run_error_test "Invalid SMTP server" \
     "nonexistent.server.invalid" \
     "test@test.com" \
@@ -181,7 +162,6 @@ run_error_test "Invalid SMTP server" \
 
 echo ""
 
-# Тест 8: Неверный порт (используем другой хост для симуляции)
 run_error_test "Connection refused" \
     "127.0.0.1" \
     "test@test.com" \
@@ -193,7 +173,6 @@ echo ""
 
 echo -e "${YELLOW}Edge Cases Tests:${NC}"
 
-# Тест 9: Очень длинное тело письма
 long_body=$(printf 'A%.0s' {1..1000})
 run_test "Email with long body (1000 chars)" \
     "sender@test.com" \
@@ -203,7 +182,6 @@ run_test "Email with long body (1000 chars)" \
 
 echo ""
 
-# Тест 10: Email с числами
 run_test "Email addresses with numbers" \
     "user123@test456.com" \
     "recipient789@domain012.com" \
@@ -212,7 +190,6 @@ run_test "Email addresses with numbers" \
 
 echo ""
 
-# Итоговая статистика
 echo -e "${BOLD}======================================${NC}"
 echo -e "${BOLD}Test Summary:${NC}"
 echo "  Total:  $((TESTS_PASSED + TESTS_FAILED))"

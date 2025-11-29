@@ -1,9 +1,3 @@
-/**
- * Базовый SMTP-клиент
- * Реализует подключение к SMTP-серверу по порту 25 и отправку простых текстовых писем
- * Использует системные вызовы: socket(), connect(), read(), write(), close()
- */
-
 #include <iostream>
 #include <cstring>
 #include <sys/socket.h>
@@ -15,7 +9,7 @@
 #include <sstream>
 
 const int BUFFER_SIZE = 4096;
-const int SMTP_PORT = 25;
+const int SMTP_PORT = 2525;
 
 class SMTPClient {
 private:
@@ -23,9 +17,6 @@ private:
     std::string server_host;
     std::string client_domain;
     
-    /**
-     * Отправка команды на сервер
-     */
     bool sendCommand(const std::string& command) {
         std::string cmd = command + "\r\n";
         std::cout << "C: " << command << std::endl;
@@ -38,9 +29,6 @@ private:
         return true;
     }
     
-    /**
-     * Получение ответа от сервера
-     */
     std::string receiveResponse() {
         char buffer[BUFFER_SIZE];
         memset(buffer, 0, BUFFER_SIZE);
@@ -56,9 +44,6 @@ private:
         return response;
     }
     
-    /**
-     * Проверка кода ответа сервера
-     */
     bool checkResponseCode(const std::string& response, const std::string& expected_code) {
         if (response.length() < 3) {
             return false;
@@ -66,9 +51,6 @@ private:
         return response.substr(0, 3) == expected_code;
     }
     
-    /**
-     * Разрешение имени хоста в IP-адрес
-     */
     bool resolveHost(const std::string& hostname, std::string& ip_address) {
         struct hostent* host = gethostbyname(hostname.c_str());
         if (host == nullptr) {
@@ -91,11 +73,7 @@ public:
         disconnect();
     }
     
-    /**
-     * Установка TCP-соединения с SMTP-сервером
-     */
     bool connect() {
-        // Создание сокета
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockfd < 0) {
             std::cerr << "Ошибка создания сокета" << std::endl;
@@ -104,7 +82,6 @@ public:
         
         std::cout << "Сокет создан успешно" << std::endl;
         
-        // Разрешение имени хоста
         std::string ip_address;
         if (!resolveHost(server_host, ip_address)) {
             close(sockfd);
@@ -112,7 +89,6 @@ public:
             return false;
         }
         
-        // Настройка адреса сервера
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(server_addr));
         server_addr.sin_family = AF_INET;
@@ -125,10 +101,9 @@ public:
             return false;
         }
         
-        // Подключение к серверу
         std::cout << "Подключение к " << server_host << ":" << SMTP_PORT << "..." << std::endl;
         if (::connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-            std::cerr << "Ошибка подключения к серверу" << std::endl;
+            std::cerr << "Ошибка подключения к серверу: " << strerror(errno) << std::endl;
             close(sockfd);
             sockfd = -1;
             return false;
@@ -136,7 +111,6 @@ public:
         
         std::cout << "Подключение установлено" << std::endl;
         
-        // Получение приветствия от сервера (код 220)
         std::string response = receiveResponse();
         if (!checkResponseCode(response, "220")) {
             std::cerr << "Неожиданный ответ при подключении" << std::endl;
@@ -146,12 +120,8 @@ public:
         return true;
     }
     
-    /**
-     * Отправка письма
-     */
     bool sendEmail(const std::string& from, const std::string& to, 
                    const std::string& subject, const std::string& body) {
-        // Команда HELO
         if (!sendCommand("HELO " + client_domain)) {
             return false;
         }
@@ -161,7 +131,6 @@ public:
             return false;
         }
         
-        // Команда MAIL FROM
         if (!sendCommand("MAIL FROM:<" + from + ">")) {
             return false;
         }
@@ -171,7 +140,6 @@ public:
             return false;
         }
         
-        // Команда RCPT TO
         if (!sendCommand("RCPT TO:<" + to + ">")) {
             return false;
         }
@@ -181,7 +149,6 @@ public:
             return false;
         }
         
-        // Команда DATA
         if (!sendCommand("DATA")) {
             return false;
         }
@@ -191,7 +158,6 @@ public:
             return false;
         }
         
-        // Формирование заголовков письма
         std::stringstream email_content;
         email_content << "From: " << from << "\r\n";
         email_content << "To: " << to << "\r\n";
@@ -200,7 +166,6 @@ public:
         email_content << body << "\r\n";
         email_content << ".\r\n";
         
-        // Отправка содержимого письма
         std::cout << "C: [Email content]" << std::endl;
         ssize_t sent = write(sockfd, email_content.str().c_str(), email_content.str().length());
         if (sent < 0) {
@@ -218,16 +183,11 @@ public:
         return true;
     }
     
-    /**
-     * Корректное завершение сессии
-     */
     void disconnect() {
         if (sockfd >= 0) {
-            // Команда QUIT
             sendCommand("QUIT");
             receiveResponse();
             
-            // Закрытие сокета
             close(sockfd);
             sockfd = -1;
             std::cout << "Соединение закрыто" << std::endl;
@@ -236,7 +196,6 @@ public:
 };
 
 int main(int argc, char* argv[]) {
-    // Проверка аргументов командной строки
     if (argc != 6) {
         std::cout << "Использование: " << argv[0] 
                   << " <smtp_server> <from_email> <to_email> <subject> <body>" << std::endl;
@@ -259,22 +218,18 @@ int main(int argc, char* argv[]) {
     std::cout << "Тема: " << subject << std::endl;
     std::cout << "================================" << std::endl << std::endl;
     
-    // Создание SMTP-клиента
     SMTPClient client(smtp_server, "example.com");
     
-    // Подключение к серверу
     if (!client.connect()) {
         std::cerr << "Не удалось подключиться к SMTP-серверу" << std::endl;
         return 1;
     }
     
-    // Отправка письма
     if (!client.sendEmail(from_email, to_email, subject, body)) {
         std::cerr << "Не удалось отправить письмо" << std::endl;
         return 1;
     }
     
-    // Отключение от сервера
     client.disconnect();
     
     return 0;

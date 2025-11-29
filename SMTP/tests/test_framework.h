@@ -1,8 +1,3 @@
-/**
- * Простой тестовый фреймворк для C++
- * Используется для тестирования SMTP-клиента
- */
-
 #ifndef TEST_FRAMEWORK_H
 #define TEST_FRAMEWORK_H
 
@@ -11,7 +6,6 @@
 #include <vector>
 #include <functional>
 
-// Цветной вывод в терминал
 #define RESET   "\033[0m"
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -21,7 +15,6 @@
 #define CYAN    "\033[36m"
 #define BOLD    "\033[1m"
 
-// Макросы для тестов
 #define TEST(name) void name()
 #define ASSERT_TRUE(condition) \
     if (!(condition)) { \
@@ -66,9 +59,6 @@
     } \
     std::cout << std::endl;
 
-/**
- * Синглтон для управления тестами
- */
 class TestFramework {
 private:
     int total_tests;

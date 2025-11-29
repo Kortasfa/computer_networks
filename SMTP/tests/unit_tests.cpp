@@ -1,15 +1,6 @@
-/**
- * Unit-тесты для SMTP-клиента
- * Тестируют отдельные компоненты и функции
- */
-
 #include "test_framework.h"
 #include <sstream>
 #include <cstring>
-
-// ============================================
-// Тесты для проверки кодов ответа
-// ============================================
 
 TEST(test_response_code_220) {
     std::string response = "220 smtp.example.com ESMTP Postfix\r\n";
@@ -32,10 +23,6 @@ TEST(test_response_code_invalid) {
     ASSERT_FALSE(response.substr(0, 3) == "250");
     ASSERT_TRUE(response.substr(0, 3) == "500");
 }
-
-// ============================================
-// Тесты для формирования SMTP-команд
-// ============================================
 
 TEST(test_helo_command) {
     std::string domain = "example.com";
@@ -70,10 +57,6 @@ TEST(test_quit_command) {
     std::string command = "QUIT\r\n";
     ASSERT_EQ(command, "QUIT\r\n");
 }
-
-// ============================================
-// Тесты для формирования email-заголовков
-// ============================================
 
 TEST(test_email_header_from) {
     std::string from = "sender@example.com";
@@ -113,10 +96,6 @@ TEST(test_email_complete_headers) {
     ASSERT_CONTAINS(result, ".\r\n");
 }
 
-// ============================================
-// Тесты для проверки валидации email
-// ============================================
-
 TEST(test_valid_email_format) {
     std::string email = "user@example.com";
     ASSERT_TRUE(email.find('@') != std::string::npos);
@@ -134,10 +113,6 @@ TEST(test_invalid_email_no_domain) {
     ASSERT_TRUE(at_pos != std::string::npos);
     ASSERT_FALSE(email.find('.', at_pos) != std::string::npos);
 }
-
-// ============================================
-// Тесты для работы со строками
-// ============================================
 
 TEST(test_string_trimming) {
     std::string str = "  test  ";
@@ -159,13 +134,9 @@ TEST(test_string_contains_crlf) {
     ASSERT_CONTAINS(str, "\r\n");
 }
 
-// ============================================
-// Тесты для порта и констант
-// ============================================
-
 TEST(test_smtp_port_constant) {
-    const int SMTP_PORT = 25;
-    ASSERT_EQ(SMTP_PORT, 25);
+    const int SMTP_PORT = 2525;
+    ASSERT_EQ(SMTP_PORT, 2525);
     ASSERT_NE(SMTP_PORT, 587);
     ASSERT_NE(SMTP_PORT, 465);
 }
@@ -175,10 +146,6 @@ TEST(test_buffer_size_constant) {
     ASSERT_EQ(BUFFER_SIZE, 4096);
     ASSERT_TRUE(BUFFER_SIZE > 0);
 }
-
-// ============================================
-// Тесты для многострочных ответов
-// ============================================
 
 TEST(test_multiline_response) {
     std::string response = "250-smtp.example.com\r\n250-SIZE 10240000\r\n250 HELP\r\n";
@@ -191,10 +158,6 @@ TEST(test_single_line_response) {
     ASSERT_TRUE(response.substr(0, 3) == "250");
     ASSERT_TRUE(response.length() < 100);
 }
-
-// ============================================
-// Тесты для специальных символов в email
-// ============================================
 
 TEST(test_email_with_spaces_in_subject) {
     std::string subject = "This is a test subject";
@@ -215,10 +178,6 @@ TEST(test_email_body_terminator) {
     ASSERT_EQ(terminator[0], '.');
 }
 
-// ============================================
-// Тесты для DNS и хостов
-// ============================================
-
 TEST(test_localhost_resolution) {
     std::string host = "localhost";
     ASSERT_EQ(host, "localhost");
@@ -236,13 +195,7 @@ TEST(test_ip_address_format) {
     }
     ASSERT_EQ(dots, 3);
 }
-
-// ============================================
-// Тесты для обработки ошибок
-// ============================================
-
 TEST(test_error_response_codes) {
-    // Проверка различных кодов ошибок
     std::string err500 = "500 Syntax error\r\n";
     std::string err550 = "550 User not found\r\n";
     std::string err554 = "554 Transaction failed\r\n";
@@ -253,7 +206,6 @@ TEST(test_error_response_codes) {
 }
 
 TEST(test_success_response_codes) {
-    // Проверка успешных кодов
     std::string resp220 = "220 Ready\r\n";
     std::string resp250 = "250 OK\r\n";
     std::string resp354 = "354 Start input\r\n";
@@ -263,24 +215,18 @@ TEST(test_success_response_codes) {
     ASSERT_TRUE(resp354.substr(0, 1) == "3");
 }
 
-// ============================================
-// Главная функция для запуска тестов
-// ============================================
-
 int main() {
     std::cout << BOLD << BLUE << "=====================================" << RESET << std::endl;
     std::cout << BOLD << BLUE << "  SMTP Client - Unit Tests" << RESET << std::endl;
     std::cout << BOLD << BLUE << "=====================================" << RESET << std::endl;
     std::cout << std::endl;
     
-    // Тесты кодов ответа
     std::cout << YELLOW << "Response Code Tests:" << RESET << std::endl;
     RUN_TEST(test_response_code_220);
     RUN_TEST(test_response_code_250);
     RUN_TEST(test_response_code_354);
     RUN_TEST(test_response_code_invalid);
     
-    // Тесты команд
     std::cout << YELLOW << "SMTP Command Tests:" << RESET << std::endl;
     RUN_TEST(test_helo_command);
     RUN_TEST(test_mail_from_command);
@@ -288,52 +234,43 @@ int main() {
     RUN_TEST(test_data_command);
     RUN_TEST(test_quit_command);
     
-    // Тесты заголовков
     std::cout << YELLOW << "Email Header Tests:" << RESET << std::endl;
     RUN_TEST(test_email_header_from);
     RUN_TEST(test_email_header_to);
     RUN_TEST(test_email_header_subject);
     RUN_TEST(test_email_complete_headers);
     
-    // Тесты валидации email
     std::cout << YELLOW << "Email Validation Tests:" << RESET << std::endl;
     RUN_TEST(test_valid_email_format);
     RUN_TEST(test_invalid_email_no_at);
     RUN_TEST(test_invalid_email_no_domain);
     
-    // Тесты строк
     std::cout << YELLOW << "String Handling Tests:" << RESET << std::endl;
     RUN_TEST(test_string_trimming);
     RUN_TEST(test_string_empty);
     RUN_TEST(test_string_contains_crlf);
     
-    // Тесты констант
     std::cout << YELLOW << "Constants Tests:" << RESET << std::endl;
     RUN_TEST(test_smtp_port_constant);
     RUN_TEST(test_buffer_size_constant);
     
-    // Тесты многострочных ответов
     std::cout << YELLOW << "Multiline Response Tests:" << RESET << std::endl;
     RUN_TEST(test_multiline_response);
     RUN_TEST(test_single_line_response);
     
-    // Тесты специальных символов
     std::cout << YELLOW << "Special Characters Tests:" << RESET << std::endl;
     RUN_TEST(test_email_with_spaces_in_subject);
     RUN_TEST(test_email_with_special_chars);
     RUN_TEST(test_email_body_terminator);
     
-    // Тесты DNS
     std::cout << YELLOW << "DNS and Network Tests:" << RESET << std::endl;
     RUN_TEST(test_localhost_resolution);
     RUN_TEST(test_ip_address_format);
     
-    // Тесты обработки ошибок
     std::cout << YELLOW << "Error Handling Tests:" << RESET << std::endl;
     RUN_TEST(test_error_response_codes);
     RUN_TEST(test_success_response_codes);
     
-    // Итоги
     std::cout << std::endl;
     TestFramework::getInstance().printSummary();
     
