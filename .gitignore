@@ -5,6 +5,7 @@ socket-programming/server
 web-server/webserver
 web-server/run_tests
 
+tcp
 __pycache__/
 *.pyc
 

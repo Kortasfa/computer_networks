@@ -1,0 +1,55 @@
+Пример логов прокси-сервера, демонстрирующих работу кэширования
+====================================================================
+
+Запуск прокси-сервера:
+-----------------------
+[2024-12-24 11:45:30] Proxy server started on port 8080
+[2024-12-24 11:45:30] Cache directory: ./cache
+
+Первый запрос к example.com (Cache MISS):
+------------------------------------------
+[2024-12-24 11:45:35] Received request from client (512 bytes)
+[2024-12-24 11:45:35] Request line: GET http://example.com/ HTTP/1.1
+[2024-12-24 11:45:35] Request: GET http://example.com:80/
+[2024-12-24 11:45:35] Cache MISS: example.com:80/
+[2024-12-24 11:45:36] Response sent to client
+
+Повторный запрос к example.com (Cache HIT - ускоренная загрузка):
+-------------------------------------------------------------------
+[2024-12-24 11:45:40] Received request from client (512 bytes)
+[2024-12-24 11:45:40] Request line: GET http://example.com/ HTTP/1.1
+[2024-12-24 11:45:40] Request: GET http://example.com:80/
+[2024-12-24 11:45:40] Cache HIT: example.com:80/
+[2024-12-24 11:45:40] Response sent to client
+
+Запрос к другому сайту (httpbin.org):
+--------------------------------------
+[2024-12-24 11:46:10] Received request from client (485 bytes)
+[2024-12-24 11:46:10] Request line: GET http://httpbin.org/get HTTP/1.1
+[2024-12-24 11:46:10] Request: GET http://httpbin.org:80/get
+[2024-12-24 11:46:10] Cache MISS: httpbin.org:80/get
+[2024-12-24 11:46:11] Response sent to client
+
+Повторный запрос к httpbin.org (Cache HIT):
+--------------------------------------------
+[2024-12-24 11:46:20] Received request from client (485 bytes)
+[2024-12-24 11:46:20] Request line: GET http://httpbin.org/get HTTP/1.1
+[2024-12-24 11:46:20] Request: GET http://httpbin.org:80/get
+[2024-12-24 11:46:20] Cache HIT: httpbin.org:80/get
+[2024-12-24 11:46:20] Response sent to client
+
+Обработка ошибки 404 (не кэшируется):
+--------------------------------------
+[2024-12-24 11:47:00] Received request from client (498 bytes)
+[2024-12-24 11:47:00] Request line: GET http://example.com/nonexistent.html HTTP/1.1
+[2024-12-24 11:47:00] Request: GET http://example.com:80/nonexistent.html
+[2024-12-24 11:47:00] Cache MISS: example.com:80/nonexistent.html
+[2024-12-24 11:47:01] Response sent to client
+
+====================================================================
+Важные наблюдения:
+- Cache MISS: запрос обрабатывается ~1 секунду (сетевое обращение)
+- Cache HIT: запрос обрабатывается мгновенно (чтение с диска)
+- Ошибки 404 не кэшируются (правильное поведение)
+- Прокси корректно обрабатывает запросы к разным сайтам
+
